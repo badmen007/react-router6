@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>browser</title>
+</head>
+<body>
+    <div id="root"></div>
+    <ul>
+      <li><a onclick="go('/a')">/a</a></li>
+      <li><a onclick="go('/b')">/b</a></li>
+      <li><a onclick="go('/c')">/c</a></li>
+      <li onclick="forward()">前进</li>
+      <li onclick="back()">后退</li>
+    </ul>
+    <script>
+      // 这个事件只有在浏览器前进和后退的时候才会触发的
+
+      function render() {
+        root.innerHTML = window.location.pathname;
+      }
+
+      window.onpopstate = render;
+      let historyObj = window.history;
+      let oldPushState = historyObj.pushState;
+      
+      historyObj.pushState = function (state, title, url) {
+        oldPushState.apply(history, arguments);
+        render();
+      }
+
+      const go = (pathname) => {
+        history.pushState({}, null, pathname)
+      }
+      const forward = () => {
+        history.forward();
+      }
+      const back = () => {
+        // history.go(-1);
+        history.back();
+      }
+    </script>
+</body>
+</html>
