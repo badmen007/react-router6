@@ -49,10 +49,14 @@ export function useRoutes(routes) {
 }
 
 function compilePath(path) {
-  let regexpSource = '^' + path;
+  let paramNames = [];
+  let regexpSource = '^' + path.replace(/:(\w+)/g,(_, key) => {
+    paramNames.push(key);
+    return '([^\\/]+)'
+  });
   regexpSource += '$';
   let matcher = new RegExp(regexpSource);
-  return matcher;
+  return [matcher, paramNames];
 }
 
 /**
@@ -61,10 +65,16 @@ function compilePath(path) {
  * @param {*} pathname 浏览器地址栏中的路径
  */
 export function matchPath(path, pathname) {
-  let matcher = compilePath(path);
+  let [matcher, paramNames] = compilePath(path);
   let match = pathname.match(matcher);
   if(!match) return null;
-  return match;
+  let matchedPathname = match[0];
+  let values = match.slice(1);
+  let params = paramNames.reduce((memo, paramName, index) => {
+    memo[paramName] = values[index];
+    return memo;
+  }, {})
+  return {params, pathname: matchedPathname, match};
 }
 
 
@@ -78,4 +88,10 @@ function createRoutesFromChildren(children) {
     routes.push(route);
   })
   return routes;
+}
+
+export function useNavigate() {
+  let { navigator } = React.useContext(NavigationContext); 
+  let navigate = React.useCallback(to => navigator.push(to), [navigator]);  // 这个to挺有意思的
+  return navigate;
 }

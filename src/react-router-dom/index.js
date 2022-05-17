@@ -1,6 +1,6 @@
 import React from 'react';
-import { createHashHistory, createBrowserHistory } from 'history'
-import { Router } from '../react-router';
+import { createHashHistory, createBrowserHistory } from '../history'
+import { Router, useNavigate } from '../react-router';
 export * from '../react-router';
 
 export function HashRouter({children}) {
@@ -26,9 +26,9 @@ export function HashRouter({children}) {
   )
 }
 
-export function BrowserHistory({children}) {
+export function BrowserRouter({children}) {
   let historyRef = React.useRef();
-  if(!historyRef) {
+  if(!historyRef.current) {
     historyRef.current = createBrowserHistory();
   }
   let history = historyRef.current;
@@ -43,6 +43,19 @@ export function BrowserHistory({children}) {
       location={state.location}
       navigationType={state.action}
       navigator={history}
+    />
+  )
+}
+
+export function Link({to, ...rest}) {
+  let navigate = useNavigate();
+  function handleClick() {
+    navigate(to);
+  }
+  return (
+    <a
+      {...rest}
+      onClick={handleClick}
     />
   )
 }
